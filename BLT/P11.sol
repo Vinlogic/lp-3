@@ -1,4 +1,3 @@
-
 // P11: Bank Account Smart Contract
 
 // SPDX-License-Identifier: MIT
@@ -37,64 +36,39 @@ contract BankAccount {
 }
 
 /*
-========================================
-SAMPLE INPUT / TESTING
-========================================
+SAMPLE TESTING:
 
 1. Deploy the BankAccount contract.
+2. Call deposit() with Value = 1 Ether.
+3. Call showBalance().
 
-2. Deposit:
-   Value: 1
-   Unit: Ether
-   Function: deposit()
+Expected balance:
+1000000000000000000 wei
 
-3. Check balance:
-   Function: showBalance()
+4. Call withdraw() with amount:
+200000000000000000
 
-   Expected output:
-   1000000000000000000 wei
+5. Call showBalance() again.
 
-4. Withdraw:
-   Amount: 200000000000000000
-   Function: withdraw()
+Expected balance:
+800000000000000000 wei
 
-5. Check balance again:
-   Function: showBalance()
-
-   Expected output:
-   800000000000000000 wei
-
-========================================
-HOW TO COMPILE AND RUN
-========================================
+HOW TO COMPILE AND RUN:
 
 1. Open https://remix.ethereum.org
-
 2. Create a file named P11.sol.
-
 3. Paste this program.
-
-4. Open the Solidity Compiler.
-   Select compiler version 0.8.20 or compatible.
-
-5. Click Compile P11.sol.
-
+4. Select Solidity compiler 0.8.20.
+5. Compile P11.sol.
 6. Open Deploy & Run Transactions.
-
 7. Select Injected Provider - MetaMask.
-
-8. Connect MetaMask using the Sepolia test network.
-
+8. Connect MetaMask to Sepolia test network.
 9. Deploy the contract.
-
 10. Test deposit(), withdraw() and showBalance().
 
 IMPORTANT:
 - Use test ETH only.
 - Never share your wallet password or seed phrase.
-- Transaction fees (gas fees) are paid for state-changing
-  transactions such as deposit() and withdraw().
+- deposit() and withdraw() require gas.
 - showBalance() is a read-only function.
-
-========================================
 */

@@ -79,12 +79,12 @@ public class P3 {
     }
 }
 
-input : 
-Enter number of items: 3
-Enter weight and value: 10 60
-Enter weight and value: 20 100
-Enter weight and value: 30 120
-Enter knapsack capacity: 50
+// input : 
+// Enter number of items: 3
+// Enter weight and value: 10 60
+// Enter weight and value: 20 100
+// Enter weight and value: 30 120
+// Enter knapsack capacity: 50
 
-output : 
-Maximum value: 240.0
+// output : 
+// Maximum value: 240.0

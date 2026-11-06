@@ -1,4 +1,3 @@
-
 // P12: Student Data Smart Contract
 
 // SPDX-License-Identifier: MIT
@@ -17,11 +16,7 @@ contract StudentData {
     Student[] public students;
 
     // Add a new student
-    function addStudent(
-        uint id,
-        string memory name,
-        uint marks
-    ) public {
+    function addStudent(uint id, string memory name, uint marks) public {
         students.push(Student(id, name, marks));
     }
 
@@ -49,101 +44,68 @@ contract StudentData {
 }
 
 /*
-========================================
-SAMPLE INPUT / TESTING
-========================================
+SAMPLE TESTING:
 
 1. Deploy the StudentData contract.
 
-2. Add student:
-   Function: addStudent()
+2. Call addStudent():
    id: 101
    name: Rahul
    marks: 85
 
-3. Retrieve student:
-   Function: getStudent()
-   index: 0
+3. Call getStudent() with index 0.
 
-   Expected output:
-   101, Rahul, 85
+Expected output:
+101, Rahul, 85
 
-4. Check total students:
-   Function: getCount()
+4. Call getCount().
 
-   Expected output:
-   1
+Expected output:
+1
 
 5. Add another student:
    id: 102
    name: Priya
    marks: 90
 
-6. Check total students again:
-   Function: getCount()
+6. Call getCount() again.
 
-   Expected output:
-   2
+Expected output:
+2
 
-========================================
-HOW TO COMPILE AND DEPLOY
-========================================
+HOW TO COMPILE AND DEPLOY:
 
 1. Open https://remix.ethereum.org
-
 2. Create a file named P12.sol.
-
 3. Paste this program.
+4. Select Solidity compiler 0.8.20.
+5. Compile P12.sol.
+6. Open Deploy & Run Transactions.
+7. Select Injected Provider - MetaMask.
+8. Connect to Sepolia test network.
+9. Deploy the contract.
+10. Test addStudent(), getStudent() and getCount().
 
-4. Open Solidity Compiler.
+FALLBACK TEST:
 
-5. Select compiler version 0.8.20 or compatible.
+Send a small amount of test ETH directly to the contract
+without selecting a function. This calls the payable fallback
+when the call data does not match a function (and no receive
+function is defined).
 
-6. Click Compile P12.sol.
+IMPORTANT CONCEPTS:
 
-7. Open Deploy & Run Transactions.
+1. STRUCT: Groups related data into one custom data type.
+2. ARRAY: Stores multiple student records.
+3. PUSH(): Adds a new student to the array.
+4. MEMORY: Temporary data location.
+5. REQUIRE(): Checks whether the array index is valid.
+6. FALLBACK: Handles calls with unmatched function data.
 
-8. Select Injected Provider - MetaMask.
-
-9. Connect to the Sepolia test network.
-
-10. Deploy the contract.
-
-11. Test addStudent(), getStudent() and getCount().
-
-========================================
-IMPORTANT CONCEPTS
-========================================
-
-1. STRUCT:
-   Groups related data into one custom data type.
-
-2. ARRAY:
-   Stores multiple student records.
-
-3. PUSH():
-   Adds a new student to the array.
-
-4. MEMORY:
-   Temporary data location used during function execution.
-
-5. REQUIRE():
-   Checks whether the requested array index is valid.
-
-6. FALLBACK:
-   Special function called when a contract receives
-   a call with unmatched function data.
-   This fallback is payable, so it can receive Ether.
-
-========================================
-GAS FEE OBSERVATION
-========================================
+GAS FEE OBSERVATION:
 
 - addStudent() changes blockchain data and costs gas.
 - getStudent() and getCount() are view functions.
-- Reading them through Remix does not require an
-  on-chain transaction fee.
-- Gas fee = Gas used × Effective gas price.
-
-========================================
+- Normal Remix read calls do not require an on-chain fee.
+- Gas fee = Gas used x Effective gas price.
 */

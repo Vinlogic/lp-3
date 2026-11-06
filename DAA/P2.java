@@ -3,7 +3,6 @@ import java.util.Scanner;
 
 public class P2 {
 
-    // Node of the Huffman tree
     static class Node {
         char ch;
         int freq;
@@ -15,11 +14,10 @@ public class P2 {
         }
     }
 
-    // Walk the tree: left edge = 0, right edge = 1
     static void printCodes(Node root, String code) {
-        if (root == null) return;
+        if (root == null)
+            return;
 
-        // Leaf node -> print its code
         if (root.left == null && root.right == null) {
             System.out.println(root.ch + " : " + (code.isEmpty() ? "0" : code));
             return;
@@ -41,8 +39,7 @@ public class P2 {
             return;
         }
 
-        // Min-heap ordered by frequency
-        PriorityQueue<Node> pq =
+        PriorityQueue<Node> queue =
             new PriorityQueue<>((a, b) -> Integer.compare(a.freq, b.freq));
 
         for (int i = 0; i < n; i++) {
@@ -56,23 +53,22 @@ public class P2 {
                 return;
             }
 
-            pq.add(new Node(ch, freq));
+            queue.add(new Node(ch, freq));
         }
 
-        // Greedy step: repeatedly merge the two smallest-frequency nodes
-        while (pq.size() > 1) {
-            Node left = pq.poll();
-            Node right = pq.poll();
+        while (queue.size() > 1) {
+            Node left = queue.poll();
+            Node right = queue.poll();
 
             Node parent = new Node('-', left.freq + right.freq);
             parent.left = left;
             parent.right = right;
 
-            pq.add(parent);
+            queue.add(parent);
         }
 
         System.out.println("\nHuffman Codes:");
-        printCodes(pq.poll(), "");
+        printCodes(queue.poll(), "");
 
         sc.close();
     }
@@ -80,22 +76,28 @@ public class P2 {
 
 /*
 SAMPLE INPUT:
-Enter number of characters: 6
-a 5
-b 9
-c 12
-d 13
-e 16
-f 45
+4
+A 5
+B 9
+C 12
+D 13
 
-SAMPLE OUTPUT (bits may differ on ties, code lengths stay the same):
-f : 0
-c : 100
-d : 101
-a : 1100
-b : 1101
-e : 111
+SAMPLE OUTPUT:
+Huffman Codes:
+A : 00
+B : 01
+C : 10
+D : 11
+
+NOTE:
+Huffman codes can differ when frequencies tie, but the code lengths
+and total encoding cost remain optimal.
 
 Time complexity : O(n log n)
 Space complexity: O(n)
+
+RUN:
+javac P2.java
+java P2/
+
 */

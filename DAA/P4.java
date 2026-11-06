@@ -1,21 +1,23 @@
-
 import java.util.Scanner;
 
 public class P4 {
 
     public static void main(String[] args) {
-
         Scanner sc = new Scanner(System.in);
 
         System.out.print("Enter number of items: ");
         int n = sc.nextInt();
 
+        if (n <= 0) {
+            System.out.println("Invalid number of items");
+            sc.close();
+            return;
+        }
+
         int[] weight = new int[n];
         int[] value = new int[n];
 
-        // Input item details
         for (int i = 0; i < n; i++) {
-
             System.out.print("Enter weight and value: ");
             weight[i] = sc.nextInt();
             value[i] = sc.nextInt();
@@ -37,41 +39,41 @@ public class P4 {
         }
 
         // Create DP table
-        int[][] dp = new int[n + 1][W + 1];
+        long[][] dp = new long[n + 1][W + 1];
 
         // Fill DP table
         for (int i = 1; i <= n; i++) {
-
             for (int w = 0; w <= W; w++) {
-
                 if (weight[i - 1] <= w) {
-
-                    int include = value[i - 1]
+                    long include = value[i - 1]
                             + dp[i - 1][w - weight[i - 1]];
 
-                    int exclude = dp[i - 1][w];
+                    long exclude = dp[i - 1][w];
 
                     dp[i][w] = Math.max(include, exclude);
-
                 } else {
-
                     dp[i][w] = dp[i - 1][w];
                 }
             }
         }
 
         System.out.println("Maximum value: " + dp[n][W]);
-
         sc.close();
     }
 }
 
-// input : 
-// Enter number of items: 3
-// Enter weight and value: 10 60
-// Enter weight and value: 20 100
-// Enter weight and value: 30 120
-// Enter knapsack capacity: 50
+/*
+SAMPLE INPUT:
+3
+10 60
+20 100
+30 120
+50
 
-// output : 
-// Maximum value: 220
+SAMPLE OUTPUT:
+Maximum value: 220
+
+RUN:
+javac P4.java
+java P4
+*/

@@ -7,11 +7,8 @@ from sklearn.cluster import KMeans
 # Load dataset
 data = pd.read_csv("sample.csv", encoding="cp1252")
 
-# Select numerical columns
-X = data.select_dtypes(include="number")
-
-# Remove columns with constant values
-X = X.loc[:, X.nunique() > 1]
+# Select Sales and Profit columns only
+X = data[["Sales", "Profit"]]
 
 if len(X) < 3 or X.shape[1] == 0:
     raise ValueError("Not enough numerical data for clustering")

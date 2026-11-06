@@ -6,8 +6,8 @@ from sklearn.cluster import KMeans
 # Load dataset
 data = pd.read_csv("sales_data_sample.csv", encoding="cp1252")
 
-# Select Sales and Profit columns only
-X = data[["Sales", "Profit"]]
+# Select Sales and Quantity columns only
+X = data[["SALES", "QUANTITYORDERED"]]
 
 if len(X) < 3:
     print("Not enough data for clustering")
@@ -28,7 +28,7 @@ data["Cluster"] = model.fit_predict(X_scaled)
 
 # Display results
 print("Clustered Sales Data:")
-print(data.head())
+print(data[["ORDERNUMBER", "SALES", "QUANTITYORDERED", "Cluster"]].head())
 
 print("\nCluster Count:")
 print(data["Cluster"].value_counts().sort_index())
@@ -41,28 +41,6 @@ plt.scatter(
 )
 
 plt.xlabel("Sales (scaled)")
-plt.ylabel("Profit (scaled)")
+plt.ylabel("Quantity Ordered (scaled)")
 plt.title("Sales Data Clustering")
 plt.show()
-
-
-# -----------------------------------------
-# SAMPLE INPUT:
-# Dataset: sample(1).csv
-# Columns: Sales, Profit
-#
-# SAMPLE OUTPUT:
-# Clustered Sales Data:
-# (First five records with cluster labels)
-#
-# Cluster Count:
-# 0    (Number of records)
-# 1    (Number of records)
-# 2    (Number of records)
-#
-# INSTALL:
-# python -m pip install pandas matplotlib scikit-learn
-#
-# RUN:
-# python P10.py
-# -----------------------------------------

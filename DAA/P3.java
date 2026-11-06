@@ -1,4 +1,3 @@
-
 import java.util.*;
 
 public class P3 {
@@ -15,17 +14,20 @@ public class P3 {
     }
 
     public static void main(String[] args) {
-
         Scanner sc = new Scanner(System.in);
 
         System.out.print("Enter number of items: ");
         int n = sc.nextInt();
 
+        if (n <= 0) {
+            System.out.println("Invalid number of items");
+            sc.close();
+            return;
+        }
+
         Item[] items = new Item[n];
 
-        // Input item details
         for (int i = 0; i < n; i++) {
-
             System.out.print("Enter weight and value: ");
             int weight = sc.nextInt();
             int value = sc.nextInt();
@@ -49,42 +51,41 @@ public class P3 {
         }
 
         // Sort items by value/weight ratio
-        Arrays.sort(items,
-            (a, b) -> Double.compare(b.ratio, a.ratio)
-        );
+        Arrays.sort(items, (a, b) -> Double.compare(b.ratio, a.ratio));
 
         double totalValue = 0;
 
         // Fill the knapsack
         for (Item item : items) {
-
             if (capacity == 0)
                 break;
 
             if (item.weight <= capacity) {
-
                 totalValue += item.value;
                 capacity -= item.weight;
-
             } else {
-
                 totalValue += item.ratio * capacity;
                 capacity = 0;
             }
         }
 
         System.out.println("Maximum value: " + totalValue);
-
         sc.close();
     }
 }
 
-// input : 
-// Enter number of items: 3
-// Enter weight and value: 10 60
-// Enter weight and value: 20 100
-// Enter weight and value: 30 120
-// Enter knapsack capacity: 50
+/*
+SAMPLE INPUT:
+3
+10 60
+20 100
+30 120
+50
 
-// output : 
-// Maximum value: 240.0
+SAMPLE OUTPUT:
+Maximum value: 240.0
+
+RUN:
+javac P3.java
+java P3
+*/

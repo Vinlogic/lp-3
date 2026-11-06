@@ -1,4 +1,3 @@
-
 import java.util.Scanner;
 
 public class P5 {
@@ -8,7 +7,6 @@ public class P5 {
 
     // Check whether queen can be placed
     static boolean isSafe(int row, int col) {
-
         // Check column
         for (int i = 0; i < row; i++) {
             if (board[i][col] == 1)
@@ -18,7 +16,6 @@ public class P5 {
         // Check upper-left diagonal
         for (int i = row - 1, j = col - 1;
              i >= 0 && j >= 0; i--, j--) {
-
             if (board[i][j] == 1)
                 return false;
         }
@@ -26,7 +23,6 @@ public class P5 {
         // Check upper-right diagonal
         for (int i = row - 1, j = col + 1;
              i >= 0 && j < n; i--, j++) {
-
             if (board[i][j] == 1)
                 return false;
         }
@@ -36,14 +32,11 @@ public class P5 {
 
     // Solve using backtracking
     static boolean solve(int row) {
-
         if (row == n)
             return true;
 
         for (int col = 0; col < n; col++) {
-
             if (isSafe(row, col)) {
-
                 board[row][col] = 1;
 
                 if (solve(row + 1))
@@ -58,7 +51,6 @@ public class P5 {
     }
 
     public static void main(String[] args) {
-
         Scanner sc = new Scanner(System.in);
 
         System.out.print("Enter value of N: ");
@@ -85,7 +77,6 @@ public class P5 {
         board[0][col - 1] = 1;
 
         if (solve(1)) {
-
             System.out.println("N-Queens Matrix:");
 
             for (int i = 0; i < n; i++) {
@@ -94,7 +85,6 @@ public class P5 {
                 }
                 System.out.println();
             }
-
         } else {
             System.out.println("No solution exists");
         }
@@ -115,8 +105,7 @@ N-Queens Matrix:
 0 0 0 1
 0 1 0 0
 
-NOTE:
-1 represents a queen.
-0 represents an empty position.
-The first queen is placed in the specified column.
+RUN:
+javac P5.java
+java P5
 */

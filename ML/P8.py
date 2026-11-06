@@ -1,11 +1,8 @@
-
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPClassifier
-from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 
 # Load dataset
 data = pd.read_csv("Churn_Modelling.csv")
@@ -20,29 +17,24 @@ data = data.drop(
 X = data.drop("Exited", axis=1)
 y = data["Exited"]
 
-# Identify numerical and categorical columns
-num_cols = X.select_dtypes(include="number").columns
-cat_cols = X.select_dtypes(exclude="number").columns
-
-# Preprocess the data
-preprocessor = ColumnTransformer([
-    ("num", StandardScaler(), num_cols),
-    ("cat", OneHotEncoder(handle_unknown="ignore"), cat_cols)
-])
-
-# Create neural network model
-model = make_pipeline(
-    preprocessor,
-    MLPClassifier(
-        hidden_layer_sizes=(16, 8),
-        max_iter=500,
-        random_state=42
-    )
-)
+# Convert categorical columns into numbers
+X = pd.get_dummies(X, columns=["Geography", "Gender"], dtype=int)
 
 # Split dataset
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+# Scale data
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Create neural network model
+model = MLPClassifier(
+    hidden_layer_sizes=(16, 8),
+    max_iter=500,
+    random_state=42
 )
 
 # Train neural network
@@ -53,12 +45,12 @@ predictions = model.predict(X_test)
 
 # Evaluate model
 print("Accuracy:", accuracy_score(y_test, predictions))
-
 print("Confusion Matrix:")
 print(confusion_matrix(y_test, predictions))
+print(classification_report(y_test, predictions, zero_division=0))
 
 # Predict one customer
-result = model.predict(X_test.iloc[[0]])[0]
+result = model.predict(X_test[[0]])[0]
 
 if result == 1:
     print("Customer will leave the bank")

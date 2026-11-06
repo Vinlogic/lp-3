@@ -1,8 +1,9 @@
-
-import java.util.*;
+import java.util.PriorityQueue;
+import java.util.Scanner;
 
 public class P2 {
 
+    // Node of the Huffman tree
     static class Node {
         char ch;
         int freq;
@@ -14,15 +15,13 @@ public class P2 {
         }
     }
 
-    // Print Huffman codes
+    // Walk the tree: left edge = 0, right edge = 1
     static void printCodes(Node root, String code) {
+        if (root == null) return;
 
-        if (root == null)
-            return;
-
+        // Leaf node -> print its code
         if (root.left == null && root.right == null) {
-            System.out.println(root.ch + " : " +
-                    (code.isEmpty() ? "0" : code));
+            System.out.println(root.ch + " : " + (code.isEmpty() ? "0" : code));
             return;
         }
 
@@ -31,7 +30,6 @@ public class P2 {
     }
 
     public static void main(String[] args) {
-
         Scanner sc = new Scanner(System.in);
 
         System.out.print("Enter number of characters: ");
@@ -43,13 +41,11 @@ public class P2 {
             return;
         }
 
-        PriorityQueue<Node> pq = new PriorityQueue<>(
-            (a, b) -> Integer.compare(a.freq, b.freq)
-        );
+        // Min-heap ordered by frequency
+        PriorityQueue<Node> pq =
+            new PriorityQueue<>((a, b) -> Integer.compare(a.freq, b.freq));
 
-        // Read characters and frequencies
         for (int i = 0; i < n; i++) {
-
             System.out.print("Enter character and frequency: ");
             char ch = sc.next().charAt(0);
             int freq = sc.nextInt();
@@ -63,23 +59,18 @@ public class P2 {
             pq.add(new Node(ch, freq));
         }
 
-        // Build Huffman tree
+        // Greedy step: repeatedly merge the two smallest-frequency nodes
         while (pq.size() > 1) {
-
             Node left = pq.poll();
             Node right = pq.poll();
 
-            Node parent = new Node(
-                '\0', left.freq + right.freq
-            );
-
+            Node parent = new Node('-', left.freq + right.freq);
             parent.left = left;
             parent.right = right;
 
             pq.add(parent);
         }
 
-        // Print final Huffman codes
         System.out.println("\nHuffman Codes:");
         printCodes(pq.poll(), "");
 
@@ -87,16 +78,24 @@ public class P2 {
     }
 }
 
-// Input : 
-// Enter number of characters: 4
-// Enter character and frequency: A 5
-// Enter character and frequency: B 9
-// Enter character and frequency: C 12
-// Enter character and frequency: D 13
+/*
+SAMPLE INPUT:
+Enter number of characters: 6
+a 5
+b 9
+c 12
+d 13
+e 16
+f 45
 
-// Output : 
-// Huffman Codes:
-// C : 00
-// D : 01
-// A : 10
-// B : 11
+SAMPLE OUTPUT (bits may differ on ties, code lengths stay the same):
+f : 0
+c : 100
+d : 101
+a : 1100
+b : 1101
+e : 111
+
+Time complexity : O(n log n)
+Space complexity: O(n)
+*/

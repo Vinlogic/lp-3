@@ -1,102 +1,120 @@
-
-# Uber Fare Prediction: Linear Regression vs Random Forest
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
+from sklearn.metrics import mean_absolute_error, r2_score
 
-# ---------- 1. Read and pre-process ----------
-df = pd.read_csv("uber.csv")
-print(df.head())
+# Load dataset
+data = pd.read_csv("uber.csv")
 
-df = df.drop(["Unnamed: 0", "key"], axis=1, errors="ignore")   # useless columns
-df = df.dropna()                                                # remove missing values
+# Show first 5 rows of the dataset
+print(data.head())
 
-# split date into useful parts
-df["pickup_datetime"] = pd.to_datetime(df["pickup_datetime"])
-df["hour"] = df["pickup_datetime"].dt.hour
-df["day"] = df["pickup_datetime"].dt.day
-df["month"] = df["pickup_datetime"].dt.month
-df["year"] = df["pickup_datetime"].dt.year
-df = df.drop("pickup_datetime", axis=1)
+# Select required columns and remove missing values
+data = data[[
+    "fare_amount", "pickup_longitude", "pickup_latitude",
+    "dropoff_longitude", "dropoff_latitude", "passenger_count"
+]].dropna()
 
-# distance (km) between pickup and drop using Haversine formula
-def distance(lat1, lon1, lat2, lon2):
-    lat1, lon1, lat2, lon2 = map(np.radians, [lat1, lon1, lat2, lon2])
-    a = np.sin((lat2 - lat1) / 2) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin((lon2 - lon1) / 2) ** 2
-    return 6371 * 2 * np.arcsin(np.sqrt(a))
-
-df["distance"] = distance(df["pickup_latitude"], df["pickup_longitude"],
-                          df["dropoff_latitude"], df["dropoff_longitude"])
-
-# ---------- 2. Outliers ----------
-sns.boxplot(x=df["fare_amount"])
+# Visualization 1: outliers in fare (before cleaning)
+sns.boxplot(x=data["fare_amount"])
 plt.title("Fare amount (before removing outliers)")
 plt.show()
 
-def remove_outliers(data, col):
-    q1 = data[col].quantile(0.25)
-    q3 = data[col].quantile(0.75)
-    iqr = q3 - q1
-    low, high = q1 - 1.5 * iqr, q3 + 1.5 * iqr
-    print(col, "outliers:", ((data[col] < low) | (data[col] > high)).sum())
-    return data[(data[col] >= low) & (data[col] <= high)]
+# Remove invalid data (New York coordinates)
+data = data[
+    (data["fare_amount"] > 0) &
+    (data["fare_amount"] <= 100) &
+    (data["passenger_count"].between(1, 6)) &
+    (data["pickup_latitude"].between(40, 42)) &
+    (data["dropoff_latitude"].between(40, 42)) &
+    (data["pickup_longitude"].between(-75, -72)) &
+    (data["dropoff_longitude"].between(-75, -72))
+]
 
-df = df[(df["fare_amount"] > 0) & (df["passenger_count"] > 0)]   # impossible values
-df = remove_outliers(df, "fare_amount")
-df = remove_outliers(df, "distance")
-print("Rows left:", len(df))
+# Calculate distance using Haversine formula
+def haversine(lat1, lon1, lat2, lon2):
+    lat1, lon1, lat2, lon2 = map(np.radians, [lat1, lon1, lat2, lon2])
 
-# ---------- 3. Correlation ----------
-plt.figure(figsize=(10, 7))
-sns.heatmap(df.corr(), annot=True, cmap="coolwarm")
+    a = (np.sin((lat2 - lat1) / 2) ** 2 +
+         np.cos(lat1) * np.cos(lat2) *
+         np.sin((lon2 - lon1) / 2) ** 2)
+
+    return 6371 * 2 * np.arcsin(np.sqrt(np.clip(a, 0, 1)))
+
+# Calculate ride distance
+data["distance"] = haversine(
+    data["pickup_latitude"], data["pickup_longitude"],
+    data["dropoff_latitude"], data["dropoff_longitude"]
+)
+
+# Remove unusual distances
+data = data[data["distance"].between(0.1, 50)]
+
+# Visualization 2: correlation between columns
+sns.heatmap(data.corr(), annot=True, cmap="coolwarm", fmt=".2f")
 plt.title("Correlation")
 plt.show()
 
-# ---------- 4. Models ----------
-X = df.drop("fare_amount", axis=1)
-y = df["fare_amount"]
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
+# Input and output
+X = data[["distance", "passenger_count"]]
+y = data["fare_amount"]
 
-lr = LinearRegression()
-lr.fit(X_train, y_train)
-lr_pred = lr.predict(X_test)
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
-rf = RandomForestRegressor(n_estimators=50, random_state=1, n_jobs=-1)
-rf.fit(X_train, y_train)
-rf_pred = rf.predict(X_test)
+# Train Linear Regression model
+model = LinearRegression()
+model.fit(X_train, y_train)
 
-# ---------- 5. Evaluation ----------
-def show(name, pred):
-    print("\n", name)
-    print("R2   :", r2_score(y_test, pred))
-    print("RMSE :", np.sqrt(mean_squared_error(y_test, pred)))
-    print("MAE  :", mean_absolute_error(y_test, pred))
+# Evaluate model
+predictions = model.predict(X_test)
 
-show("Linear Regression", lr_pred)
-show("Random Forest", rf_pred)
+print("MAE:", mean_absolute_error(y_test, predictions))
+print("R2 Score:", r2_score(y_test, predictions))
 
-# ---------- 6. Predict the fare ----------
-plat = float(input("\nPickup latitude: "))
-plon = float(input("Pickup longitude: "))
-dlat = float(input("Drop latitude: "))
-dlon = float(input("Drop longitude: "))
-people = int(input("Passengers: "))
+# Visualization 3: actual vs predicted fare (first 500 test rides)
+plt.scatter(y_test[:500], predictions[:500], s=10)
+plt.plot([0, 60], [0, 60], color="red")
+plt.xlabel("Actual fare")
+plt.ylabel("Predicted fare")
+plt.title("Actual vs Predicted Fare")
+plt.show()
 
-new_ride = pd.DataFrame([{
-    "pickup_longitude": plon, "pickup_latitude": plat,
-    "dropoff_longitude": dlon, "dropoff_latitude": dlat,
-    "passenger_count": people,
-    "hour": 10, "day": 15, "month": 6, "year": 2015,      # assumed date and time
-    "distance": distance(plat, plon, dlat, dlon)}])
-new_ride = new_ride[X.columns]                             # same column order as training
+# Take new ride details
+print("\nEnter ride details:")
+pickup_lat = float(input("Pickup latitude: "))
+pickup_lon = float(input("Pickup longitude: "))
+dropoff_lat = float(input("Dropoff latitude: "))
+dropoff_lon = float(input("Dropoff longitude: "))
+passengers = int(input("Number of passengers: "))
 
-print("Predicted fare ($):", rf.predict(new_ride)[0])
+# Validate input
+if not (40 <= pickup_lat <= 42 and 40 <= dropoff_lat <= 42 and
+        -75 <= pickup_lon <= -72 and -75 <= dropoff_lon <= -72):
+    print("Invalid New York coordinates")
 
+elif not (1 <= passengers <= 6):
+    print("Invalid passenger count")
+
+else:
+    distance = haversine(
+        pickup_lat, pickup_lon, dropoff_lat, dropoff_lon
+    )
+
+    ride = pd.DataFrame(
+        [[distance, passengers]],
+        columns=["distance", "passenger_count"]
+    )
+
+    fare = model.predict(ride)[0]
+
+    print("Distance:", round(distance, 2), "km")
+    print("Predicted Uber Fare: $", round(max(0, fare), 2))
 
 # -----------------------------------------
 # SAMPLE INPUT:
@@ -108,10 +126,14 @@ print("Predicted fare ($):", rf.predict(new_ride)[0])
 # Number of passengers: 2
 #
 # SAMPLE OUTPUT:
-#Predicted fare ($): 8.6
+# MAE: 2.2061
+# R2 Score: 0.8229
+# Distance: 1.07 km
+# Predicted Uber Fare: $ 5.92
+# (plus 3 plots: fare boxplot, correlation heatmap, actual vs predicted)
 #
 # INSTALL:
-# python -m pip install pandas numpy scikit-learn
+# python -m pip install pandas numpy scikit-learn matplotlib seaborn
 #
 # RUN:
 # python P6.py

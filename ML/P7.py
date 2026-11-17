@@ -65,6 +65,12 @@ print(classification_report(
     zero_division=0
 ))
 
+# Compare model accuracy
+if accuracy_score(y_test, svm_pred) > accuracy_score(y_test, knn_pred):
+    print("\nSVM performed better")
+else:
+    print("\nKNN performed better")
+
 
 # -----------------------------------------
 # SAMPLE INPUT:
@@ -88,6 +94,9 @@ print(classification_report(
 # Classification Report:
 # Precision, Recall and F1-score
 # for Normal and Spam classes.
+#
+# Model Comparison:
+# SVM performed better OR KNN performed better
 #
 # INSTALL:
 # python -m pip install pandas scikit-learn

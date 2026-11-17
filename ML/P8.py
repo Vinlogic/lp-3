@@ -1,53 +1,63 @@
-# Bank Customer Churn Prediction using Neural Network
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPClassifier
-from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 
-# ---------- 1. Read the dataset ----------
-df = pd.read_csv("Churn_Modelling.csv")
-print(df.head())
+# Load dataset
+data = pd.read_csv("Churn_Modelling.csv")
 
-# ---------- 2. Features, target, train/test split ----------
-df = df.drop(["RowNumber", "CustomerId", "Surname"], axis=1)          # not useful
-df = pd.get_dummies(df, columns=["Geography", "Gender"], drop_first=True)  # text -> numbers
+# Show first 5 rows of the dataset
+print(data.head())
 
-X = df.drop("Exited", axis=1).astype(float)    # Exited: 1 = left, 0 = stayed
-y = df["Exited"]
+# Remove unnecessary columns
+data = data.drop(
+    columns=["RowNumber", "CustomerId", "Surname"],
+    errors="ignore"
+)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
+# Separate input and output (Exited: 1 = left, 0 = stayed)
+X = data.drop("Exited", axis=1)
+y = data["Exited"]
 
-# ---------- 3. Normalize ----------
+# Convert categorical columns into numbers
+X = pd.get_dummies(X, columns=["Geography", "Gender"], dtype=int)
+
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+# Scale data
 scaler = StandardScaler()
-X_train = scaler.fit_transform(X_train)   # learn from train data only
+X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
-# ---------- 4. Build the model ----------
-# Model 1: simple network (1 hidden layer)
-model1 = MLPClassifier(hidden_layer_sizes=(6,), max_iter=200, random_state=1)
-model1.fit(X_train, y_train)
-pred1 = model1.predict(X_test)
+# Create neural network model
+model = MLPClassifier(
+    hidden_layer_sizes=(16, 8),
+    max_iter=500,
+    random_state=42
+)
 
-# Improvement: more layers and neurons + early stopping to avoid overfitting
-model2 = MLPClassifier(hidden_layer_sizes=(16, 8), max_iter=500,
-                       early_stopping=True, random_state=1)
-model2.fit(X_train, y_train)
-pred2 = model2.predict(X_test)
+# Train neural network
+model.fit(X_train, y_train)
 
-# ---------- 5. Accuracy and confusion matrix ----------
-print("\n===== Model 1 (simple) =====")
-print("Accuracy:", accuracy_score(y_test, pred1))
-print(confusion_matrix(y_test, pred1))
+# Predict customer churn
+predictions = model.predict(X_test)
 
-print("\n===== Model 2 (improved) =====")
-print("Accuracy:", accuracy_score(y_test, pred2))
-print(confusion_matrix(y_test, pred2))
+# Evaluate model
+print("\nAccuracy:", accuracy_score(y_test, predictions))
+print("\nConfusion Matrix:")
+print(confusion_matrix(y_test, predictions))
+print("\nClassification Report:")
+print(classification_report(y_test, predictions, zero_division=0))
 
-# ---------- 6. Predict: will a customer leave in the next 6 months? ----------
-print("\nPrediction:", "Will LEAVE" if model2.predict(X_test[[0]])[0] == 1 else "Will STAY",
+# Predict one customer (first customer of the test set)
+result = model.predict(X_test[[0]])[0]
+
+print("Prediction:", "Will LEAVE the bank" if result == 1 else "Will STAY in the bank",
       "| Actual:", "Left" if y_test.iloc[0] == 1 else "Stayed")
-
 
 
 # -----------------------------------------
@@ -55,11 +65,18 @@ print("\nPrediction:", "Will LEAVE" if model2.predict(X_test[[0]])[0] == 1 else 
 # Dataset: Churn_Modelling.csv
 #
 # SAMPLE OUTPUT:
-# Accuracy: (Calculated value)
+# Accuracy: 0.861
+#
 # Confusion Matrix:
-# [[... ...]
-#  [... ...]]
-# Customer prediction: (Stay or Leave)
+# [[1523   70]
+#  [ 208  199]]
+#
+# Classification Report:
+#               precision    recall  f1-score   support
+#            0       0.88      0.96      0.92      1593
+#            1       0.74      0.49      0.59       407
+#
+# Prediction: Will STAY in the bank | Actual: Stayed
 #
 # INSTALL:
 # python -m pip install pandas scikit-learn

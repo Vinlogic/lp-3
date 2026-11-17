@@ -1,38 +1,55 @@
-# Gradient Descent to find the minimum of y = (x + 3)^2
-def f(x):
+# Gradient Descent to find the local minimum of y = (x + 3)^2
+import numpy as np
+import matplotlib.pyplot as plt
+
+def function(x):
     return (x + 3) ** 2
 
-def slope(x):
+def derivative(x):                 # dy/dx = 2(x + 3)
     return 2 * (x + 3)
 
-x = 2
-learning_rate = 0.1
+x = 2                              # starting point
+learning_rate = 0.1                # step size
+tolerance = 1e-6                   # stop when x barely changes
+max_iterations = 1000              # safety limit
+iteration = 0
 
-for i in range(50):
-    x = x - learning_rate * slope(x)
-    print("Step", i + 1, ": x =", round(x, 4),
-          " y =", round(f(x), 4))
+x_history = [x]                    # store every x to draw the path later
 
-print("\nLocal minimum is at x =", round(x, 4))
-print("Minimum value of y =", round(f(x), 4))
-# -----------------------------------------
-# SAMPLE INPUT:
-# No user input required.
-# Starting x = 2
-# Learning rate = 0.1
-# Iterations = 50
-#
-# SAMPLE OUTPUT (final lines):
-# Step 50 : x = -2.9999  y = 0.0
-#
-# Local minimum is at x = -2.9999
-# Minimum value of y = 0.0
-#
-# NOTE:
-# Gradient Descent is an optimization algorithm.
-# It updates x using the derivative (slope).
-# The minimum occurs near x = -3.
-#
-# RUN:
-# python P6.py
-# -----------------------------------------
+while iteration < max_iterations:
+    gradient = derivative(x)
+    new_x = x - learning_rate * gradient       # main formula
+
+    print("Iteration:", iteration + 1,
+          "x =", round(new_x, 6),
+          "y =", round(function(new_x), 6))
+
+    x_history.append(new_x)
+
+    if abs(new_x - x) < tolerance:             # converged, so stop
+        x = new_x
+        break
+
+    x = new_x
+    iteration += 1
+
+print("\nLocal minimum occurs at x =", round(x, 6))
+print("Minimum value of y =", round(function(x), 6))
+
+# ---------- Plot ----------
+x_values = np.linspace(-8, 4, 100)
+y_values = function(x_values)
+
+plt.plot(x_values, y_values, label="y = (x + 3)^2")
+plt.scatter(2, function(2), color="green", label="Starting Point (2, 25)")
+plt.scatter(x, function(x), color="red", label="Minimum Point (-3, 0)")
+
+path_y = [function(i) for i in x_history]
+plt.plot(x_history, path_y, "o--", label="Gradient Descent Path")
+
+plt.xlabel("x")
+plt.ylabel("y")
+plt.title("Gradient Descent for y = (x + 3)^2")
+plt.legend()
+plt.grid()
+plt.show()
